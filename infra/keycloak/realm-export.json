@@ -1,0 +1,110 @@
+{
+  "realm": "oan",
+  "enabled": true,
+  "displayName": "OAN Catalog Registry",
+  "roles": {
+    "realm": [
+      {
+        "name": "admin"
+      },
+      {
+        "name": "provider"
+      }
+    ],
+    "client": {
+      "oan-portal": [
+        {
+          "name": "admin"
+        },
+        {
+          "name": "provider"
+        }
+      ]
+    }
+  },
+  "clients": [
+    {
+      "clientId": "oan-portal",
+      "name": "OAN Portal",
+      "enabled": true,
+      "protocol": "openid-connect",
+      "publicClient": false,
+      "secret": "oan-portal-secret",
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": false,
+      "fullScopeAllowed": true,
+      "redirectUris": [
+        "*"
+      ],
+      "webOrigins": [
+        "*"
+      ]
+    }
+  ],
+  "users": [
+    {
+      "username": "admin_user",
+      "enabled": true,
+      "email": "admin_user@oan.local",
+      "emailVerified": true,
+      "firstName": "Admin",
+      "lastName": "User",
+      "requiredActions": [],
+      "credentials": [
+        {
+          "type": "password",
+          "value": "admin123",
+          "temporary": false
+        }
+      ],
+      "clientRoles": {
+        "oan-portal": [
+          "admin"
+        ]
+      }
+    },
+    {
+      "username": "provider_abc",
+      "enabled": true,
+      "email": "provider_abc@oan.local",
+      "emailVerified": true,
+      "firstName": "Provider",
+      "lastName": "ABC",
+      "requiredActions": [],
+      "credentials": [
+        {
+          "type": "password",
+          "value": "provider123",
+          "temporary": false
+        }
+      ],
+      "clientRoles": {
+        "oan-portal": [
+          "provider"
+        ]
+      }
+    },
+    {
+      "username": "provider_xyz",
+      "enabled": true,
+      "email": "provider_xyz@oan.local",
+      "emailVerified": true,
+      "firstName": "Provider",
+      "lastName": "XYZ",
+      "requiredActions": [],
+      "credentials": [
+        {
+          "type": "password",
+          "value": "provider123",
+          "temporary": false
+        }
+      ],
+      "clientRoles": {
+        "oan-portal": [
+          "provider"
+        ]
+      }
+    }
+  ]
+}

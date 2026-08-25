@@ -1,0 +1,128 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environment
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+.venv/
+
+# PyCharm
+.idea/
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# pyenv
+.python-version
+
+# Environments
+.env
+.env.local
+.env.*.local
+*.env
+
+# Node.js / Frontend
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+
+# Frontend Build
+frontend/dist/
+frontend/build/
+frontend/.cache/
+
+# Testing
+.coverage
+.pytest_cache/
+htmlcov/
+.tox/
+.nox/
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+db.sqlite3
+
+# Docker
+.dockerignore
+docker-compose.override.yml
+
+# Logs
+*.log
+logs/
+*.log.*
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+*~
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*.swo
+*.bak
+*.backup
+
+# Alembic
+# Keep alembic files but ignore generated migration backups
+*.pyc
+alembic/versions/*.backup
+
+# Keycloak
+infra/keycloak/data/
+
+# Documentation backups
+*.docx.backup
+
+# IDEs
+*.sublime-project
+*.sublime-workspace
+
+# Package files
+*.tar.gz
+*.zip
+
+# Local development
+local-*.yaml
+local.yaml
+dev.yaml

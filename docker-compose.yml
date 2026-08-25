@@ -1,0 +1,66 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: oan
+      POSTGRES_PASSWORD: oan
+      POSTGRES_DB: oan_catalog
+    ports:
+      - '5434:5432'
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ 'CMD-SHELL', 'pg_isready -U oan -d oan_catalog' ]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - '6380:6379'
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:25.0
+    command: [ 'start-dev', '--import-realm' ]
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_HOSTNAME_STRICT: 'false'
+      KC_HTTP_ENABLED: 'true'
+    ports:
+      - '8081:8080'
+    volumes:
+      - ./infra/keycloak/realm-export.json:/opt/keycloak/data/import/realm-export.json:ro
+
+  backend:
+    build:
+      context: ./backend
+    environment:
+      DATABASE_URL: postgresql+psycopg2://oan:oan@postgres:5432/oan_catalog
+      REDIS_URL: redis://redis:6379/0
+      KEYCLOAK_BASE_URL: http://keycloak:8080
+      KEYCLOAK_REALM: oan
+      KEYCLOAK_CLIENT_ID: oan-portal
+      KEYCLOAK_CLIENT_SECRET: oan-portal-secret
+      AUTH_ENABLED: 'true'
+    ports:
+      - '8000:8000'
+    depends_on:
+      postgres:
+        condition: service_healthy
+      keycloak:
+        condition: service_started
+
+  frontend:
+    build:
+      context: ./frontend
+    environment:
+      VITE_API_BASE: /api
+    ports:
+      - '5173:5173'
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:
