@@ -1,0 +1,252 @@
+================================================================================
+BECKN SEARCH & ON_SEARCH API PAYLOADS
+================================================================================
+
+ENDPOINT: POST /search
+
+================================================================================
+1. SEARCH REQUEST (from BAP to BPP)
+================================================================================
+
+{
+  "context": {
+    "domain": "agriculture",
+    "country": "IND",
+    "city": "Bengaluru",
+    "action": "search",
+    "core_version": "1.1.0",
+    "bap_id": "example-bap.com",
+    "bap_uri": "https://example-bap.com",
+    "transaction_id": "a9aaecca-10b7-4d19-b640-b047a7c62196",
+    "message_id": "123e4567-e89b-12d3-a456-426614174000",
+    "timestamp": "2026-08-25T10:30:00.000Z"
+  },
+  "message": {
+    "intent": {
+      "item": {
+        "descriptor": {
+          "name": "fertilizer"
+        }
+      }
+    }
+  }
+}
+
+================================================================================
+2. ON_SEARCH RESPONSE (from BPP to BAP)
+================================================================================
+
+{
+  "context": {
+    "domain": "agriculture",
+    "country": "IND",
+    "city": "Bengaluru",
+    "action": "on_search",
+    "core_version": "1.1.0",
+    "bap_id": "example-bap.com",
+    "bap_uri": "https://example-bap.com",
+    "bpp_id": "oan-catalog-registry.local",
+    "bpp_uri": "https://oan-catalog-registry.local",
+    "transaction_id": "a9aaecca-10b7-4d19-b640-b047a7c62196",
+    "message_id": "987f6543-e21c-34d5-b654-789012345678",
+    "timestamp": "2026-08-25T10:30:01.234Z"
+  },
+  "message": {
+    "catalog": {
+      "descriptor": {
+        "name": "OAN Catalog Registry"
+      },
+      "providers": [
+        {
+          "id": "ABC-AGRI-001",
+          "descriptor": {
+            "name": "ABC Agriculture"
+          },
+          "items": [
+            {
+              "id": "LIST-ABC-001",
+              "descriptor": {
+                "name": "NPK Fertilizer 10-26-26"
+              },
+              "category_id": "Fertilizers",
+              "price": {
+                "currency": "INR",
+                "value": "850.00"
+              },
+              "quantity": {
+                "available": {
+                  "count": "500"
+                }
+              },
+              "tags": {
+                "product_id": "OAN-PROD-1001",
+                "sku": "ABC-NPK-001",
+                "availability": "ACTIVE"
+              }
+            },
+            {
+              "id": "LIST-ABC-002",
+              "descriptor": {
+                "name": "Organic Fertilizer"
+              },
+              "category_id": "Fertilizers",
+              "price": {
+                "currency": "INR",
+                "value": "750.00"
+              },
+              "quantity": {
+                "available": {
+                  "count": "300"
+                }
+              },
+              "tags": {
+                "product_id": "OAN-PROD-1002",
+                "sku": "ABC-ORG-001",
+                "availability": "ACTIVE"
+              }
+            }
+          ]
+        },
+        {
+          "id": "XYZ-AGRO-002",
+          "descriptor": {
+            "name": "XYZ Agro Products"
+          },
+          "items": [
+            {
+              "id": "LIST-XYZ-001",
+              "descriptor": {
+                "name": "NPK Fertilizer 10-26-26"
+              },
+              "category_id": "Fertilizers",
+              "price": {
+                "currency": "INR",
+                "value": "900.00"
+              },
+              "quantity": {
+                "available": {
+                  "count": "250"
+                }
+              },
+              "tags": {
+                "product_id": "OAN-PROD-1001",
+                "sku": "XYZ-NPK-001",
+                "availability": "ACTIVE"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+
+================================================================================
+3. SEARCH REQUEST (Search All - Empty Intent)
+================================================================================
+
+{
+  "context": {
+    "domain": "agriculture",
+    "country": "IND",
+    "city": "Bengaluru",
+    "action": "search",
+    "core_version": "1.1.0",
+    "bap_id": "test-bap.local",
+    "bap_uri": "https://test-bap.local",
+    "transaction_id": "txn-123456",
+    "message_id": "msg-123456",
+    "timestamp": "2026-08-25T10:30:00Z"
+  },
+  "message": {
+    "intent": {}
+  }
+}
+
+================================================================================
+CURL COMMAND EXAMPLES
+================================================================================
+
+# Search for all products
+curl -X POST http://localhost:8000/search \
+  -H "Content-Type: application/json" \
+  -d '{
+    "context": {
+      "domain": "agriculture",
+      "country": "IND",
+      "city": "Bengaluru",
+      "action": "search",
+      "core_version": "1.1.0",
+      "bap_id": "test-bap.local",
+      "bap_uri": "https://test-bap.local",
+      "transaction_id": "txn-123",
+      "message_id": "msg-123",
+      "timestamp": "2026-08-25T10:30:00Z"
+    },
+    "message": {
+      "intent": {}
+    }
+  }'
+
+# Search for fertilizer
+curl -X POST http://localhost:8000/search \
+  -H "Content-Type: application/json" \
+  -d '{
+    "context": {
+      "domain": "agriculture",
+      "country": "IND",
+      "city": "Bengaluru",
+      "action": "search",
+      "core_version": "1.1.0",
+      "bap_id": "test-bap.local",
+      "bap_uri": "https://test-bap.local",
+      "transaction_id": "txn-456",
+      "message_id": "msg-456",
+      "timestamp": "2026-08-25T10:30:00Z"
+    },
+    "message": {
+      "intent": {
+        "item": {
+          "descriptor": {
+            "name": "fertilizer"
+          }
+        }
+      }
+    }
+  }'
+
+================================================================================
+NOTES
+================================================================================
+
+1. Search Request Context:
+   - action = "search"
+   - BAP provides: bap_id, bap_uri
+   - BPP fields (bpp_id, bpp_uri) are not required in request
+
+2. On_Search Response Context:
+   - action = "on_search"
+   - BPP adds: bpp_id, bpp_uri
+   - New message_id generated for response
+   - transaction_id remains same as request
+
+3. Search Logic:
+   - Filters: Active products, Active providers, Active offerings
+   - Search query matches: product name, category, provider name, provider code
+   - Empty intent returns all matching products
+
+4. Response Structure:
+   - Providers array groups items by provider
+   - Same product can appear under multiple providers
+   - Each item has unique listing_id (provider + product)
+   - Tags contain: product_id (master), sku (provider), availability
+
+5. Identifiers:
+   - product_id: Master product ID (e.g., OAN-PROD-1001)
+   - sku: Provider's SKU (e.g., ABC-NPK-001)
+   - listing_id: Unique offering ID (e.g., LIST-ABC-001)
+   - provider id: Provider code (e.g., ABC-AGRI-001)
+
+================================================================================
+END OF FILE
+================================================================================

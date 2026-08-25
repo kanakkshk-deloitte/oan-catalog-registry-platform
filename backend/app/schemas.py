@@ -1,7 +1,7 @@
 from decimal import Decimal
 from typing import Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 from app.models import AvailabilityStatus, ProviderStatus
 
@@ -15,6 +15,11 @@ class TokenResponse(BaseModel):
     access_token: str
     token_type: str
     expires_in: int
+
+
+class ChangePasswordRequest(BaseModel):
+    current_password: str = Field(min_length=1)
+    new_password: str = Field(min_length=8)
 
 
 class ProductCreate(BaseModel):
@@ -52,6 +57,7 @@ class ProviderCreate(BaseModel):
     provider_code: str
     provider_name: str
     login_username: str
+    login_password: str = Field(default='provider123', min_length=8)
 
 
 class ProviderStatusUpdate(BaseModel):
@@ -110,10 +116,11 @@ class DiscoveryItem(BaseModel):
 
 class BecknContext(BaseModel):
     domain: str
-    country: str
-    city: str
+    country: str | None = None
+    city: str | None = None
     action: str
-    core_version: str
+    core_version: str | None = Field(default=None)  # Make optional with explicit default
+    version: str | None = Field(default=None)  # Make optional with explicit default
     bap_id: str
     bap_uri: str
     bpp_id: str | None = None
@@ -121,6 +128,23 @@ class BecknContext(BaseModel):
     transaction_id: str
     message_id: str
     timestamp: str
+    ttl: str | None = None
+    location: dict | None = None  # Accept location object
+    
+    model_config = {"extra": "allow"}  # Allow extra fields
+    
+    @model_validator(mode='after')
+    def set_core_version(self):
+        # If version is provided but core_version is not, copy version to core_version
+        if self.version and not self.core_version:
+            self.core_version = self.version
+        # If core_version is provided but version is not, copy core_version to version
+        elif self.core_version and not self.version:
+            self.version = self.core_version
+        # Ensure at least one is set
+        if not self.core_version and not self.version:
+            raise ValueError("Either 'version' or 'core_version' must be provided")
+        return self
 
 
 class BecknIntent(BaseModel):

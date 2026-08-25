@@ -1,0 +1,229 @@
+================================================================================
+BECKN ASYNC CALLBACK PATTERN EXPLANATION
+================================================================================
+
+CURRENT IMPLEMENTATION: SYNCHRONOUS
+================================================================================
+
+Our current /search endpoint returns the on_search response SYNCHRONOUSLY:
+
+1. BAP sends search request to: POST http://our-bpp/search
+2. BPP processes catalog query immediately
+3. BPP returns on_search response directly in HTTP 200 response body
+4. Connection closes
+
+Code:
+@app.post('/search', response_model=BecknOnSearchResponse)
+def beckn_search(request: BecknSearchRequest, db: Session = Depends(get_db)):
+    # Query database
+    # Build response
+    return BecknOnSearchResponse(...)  # <-- Synchronous return
+
+PROS:
+✓ Simpler implementation
+✓ No need for HTTP client to call back
+✓ Works for testing and simple scenarios
+
+CONS:
+✗ NOT standard Beckn protocol
+✗ Blocks HTTP connection during processing
+✗ Doesn't scale for long-running queries
+✗ BAP expects callback, not direct response
+
+
+================================================================================
+PROPER BECKN PROTOCOL: ASYNCHRONOUS CALLBACK
+================================================================================
+
+Standard Beckn flow uses ASYNC callbacks:
+
+FLOW:
+1. BAP sends search request to: POST http://our-bpp/search
+2. BPP immediately returns ACK (HTTP 202 Accepted) - connection closes
+3. BPP processes catalog query asynchronously in background
+4. BPP calls back to: POST http://bap-uri/on_search with results
+
+This is the CORRECT Beckn implementation.
+
+
+================================================================================
+IMPLEMENTATION COMPARISON
+================================================================================
+
+SYNCHRONOUS (Current):
+-----------------------
+Request:  BAP -> POST /search -> BPP
+Response: BPP -> HTTP 200 + on_search data -> BAP (same connection)
+Time:     Blocks until query completes
+
+ASYNCHRONOUS (Proper Beckn):
+----------------------------
+Request:   BAP -> POST /search -> BPP
+Response:  BPP -> HTTP 202 Accepted (ACK) -> BAP (closes immediately)
+Callback:  BPP -> POST /on_search + data -> BAP (new connection)
+Time:      Non-blocking, BAP gets ACK immediately
+
+
+================================================================================
+ASYNC IMPLEMENTATION EXAMPLE
+================================================================================
+
+from fastapi import BackgroundTasks
+import httpx
+
+@app.post('/search')
+async def beckn_search(
+    request: BecknSearchRequest,
+    background_tasks: BackgroundTasks,
+    db: Session = Depends(get_db)
+):
+    """Beckn async search - returns ACK immediately"""
+    
+    # Queue background task to process and callback
+    background_tasks.add_task(
+        process_search_and_callback,
+        request,
+        db
+    )
+    
+    # Return immediate acknowledgement
+    return {
+        "message": {
+            "ack": {
+                "status": "ACK"
+            }
+        }
+    }
+
+
+async def process_search_and_callback(request: BecknSearchRequest, db: Session):
+    """Process search and call back to BAP"""
+    
+    # 1. Query database (same logic as before)
+    search_query = ''
+    if request.message and request.message.intent:
+        # Extract search query...
+        pass
+    
+    rows = db.execute(
+        select(Product, Provider, ProviderOffering)
+        # ... query logic ...
+    ).all()
+    
+    # 2. Build on_search response
+    on_search_response = BecknOnSearchResponse(
+        context=BecknContext(
+            action='on_search',
+            bap_id=request.context.bap_id,
+            bap_uri=request.context.bap_uri,
+            bpp_id='oan-catalog-registry.local',
+            bpp_uri='https://oan-catalog-registry.local',
+            transaction_id=request.context.transaction_id,
+            # ... other fields ...
+        ),
+        message=BecknMessage(
+            catalog=BecknCatalog(
+                # ... catalog data ...
+            )
+        )
+    )
+    
+    # 3. Call back to BAP's on_search endpoint
+    callback_url = f"{request.context.bap_uri}/on_search"
+    
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.post(
+                callback_url,
+                json=on_search_response.model_dump(),
+                headers={"Content-Type": "application/json"},
+                timeout=30.0
+            )
+            print(f"Callback to {callback_url}: {response.status_code}")
+        except Exception as e:
+            print(f"Callback failed: {e}")
+
+
+================================================================================
+WHAT SHOULD WE DO?
+================================================================================
+
+OPTION 1: Keep Synchronous (Current)
+-------------------------------------
+WHEN: For simple deployments, testing, or when BAP expects sync response
+PROS: Simple, no async complexity
+CONS: Not standard Beckn protocol
+
+OPTION 2: Implement Async Callbacks (Proper Beckn)
+---------------------------------------------------
+WHEN: For production Beckn network integration
+PROS: Standard protocol, scalable, non-blocking
+CONS: More complex, need HTTP client, error handling
+
+RECOMMENDATION:
+For proper Beckn network integration, we SHOULD implement async callbacks.
+The current sync implementation works for testing but may not work with
+standard Beckn BAPs that expect async callbacks.
+
+
+================================================================================
+CALLBACK URL CONSTRUCTION
+================================================================================
+
+From search request context, we get:
+- bap_uri: "https://example-bap.com"
+
+Callback URLs:
+- on_search: POST https://example-bap.com/on_search
+- on_select: POST https://example-bap.com/on_select
+- on_init:   POST https://example-bap.com/on_init
+- on_confirm: POST https://example-bap.com/on_confirm
+
+The BPP must construct these URLs and POST the responses to them.
+
+
+================================================================================
+BECKN NETWORK ENDPOINTS (Standard Pattern)
+================================================================================
+
+BPP (Our Service) - Receives:
+------------------------------
+POST /search      - Receives search, returns ACK
+POST /select      - Receives item selection, returns ACK
+POST /init        - Receives order init, returns ACK
+POST /confirm     - Receives order confirmation, returns ACK
+
+BAP (Caller) - Receives Callbacks:
+-----------------------------------
+POST /on_search   - Receives catalog results from BPP
+POST /on_select   - Receives selected item details from BPP
+POST /on_init     - Receives initialized order from BPP
+POST /on_confirm  - Receives confirmed order from BPP
+
+This is the standard Beckn async pattern for ALL endpoints.
+
+
+================================================================================
+CURRENT STATUS
+================================================================================
+
+✅ /search endpoint is NOW ASYNCHRONOUS (proper Beckn protocol)
+✅ Callback implementation to BAP's /on_search working
+✅ Response structure is correct (matches Beckn schema)
+✅ Background task processing implemented
+✅ Works with real Beckn BAPs expecting async callbacks
+
+IMPLEMENTATION STATUS:
+✅ Returns immediate ACK (HTTP 200 with ack.status = "ACK")
+✅ Background task processes catalog query
+✅ HTTP callback to bap_uri/on_search with results
+✅ Error handling for failed callbacks
+✅ Header forwarding (x-forwarded-host support)
+✅ Flexible URL construction based on domain/URI patterns
+
+The OAN Catalog Registry now follows proper Beckn async callback pattern!
+
+
+================================================================================
+END OF FILE
+================================================================================

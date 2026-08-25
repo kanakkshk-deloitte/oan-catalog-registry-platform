@@ -16,6 +16,7 @@ export function AdminProviders({ token, message, error, setMessage, setError }: 
     provider_code: 'ABC',
     provider_name: 'ABC Agriculture',
     login_username: 'provider_abc',
+    login_password: 'provider123',
   });
 
   async function loadProviders() {
@@ -37,7 +38,7 @@ export function AdminProviders({ token, message, error, setMessage, setError }: 
     setMessage('');
     try {
       await apiCall<Provider>('/admin/providers', 'POST', token, form);
-      setMessage(`Provider ${form.provider_code} created.`);
+      setMessage(`Provider ${form.provider_code} created. Username: ${form.login_username}, Password: ${form.login_password}`);
       await loadProviders();
     } catch (err) {
       setError((err as Error).message);
@@ -60,9 +61,22 @@ export function AdminProviders({ token, message, error, setMessage, setError }: 
     <>
       <h3>Providers</h3>
       <form className="row" onSubmit={create}>
-        <input value={form.provider_code} onChange={(e) => setForm({ ...form, provider_code: e.target.value })} placeholder="Code" />
-        <input value={form.provider_name} onChange={(e) => setForm({ ...form, provider_name: e.target.value })} placeholder="Name" />
-        <input value={form.login_username} onChange={(e) => setForm({ ...form, login_username: e.target.value })} placeholder="Login" />
+        <div>
+          <label style={{ display: 'block', marginBottom: '4px', fontWeight: '500', fontSize: '14px' }}>Provider Code</label>
+          <input value={form.provider_code} onChange={(e) => setForm({ ...form, provider_code: e.target.value })} placeholder="Code" />
+        </div>
+        <div>
+          <label style={{ display: 'block', marginBottom: '4px', fontWeight: '500', fontSize: '14px' }}>Provider Name</label>
+          <input value={form.provider_name} onChange={(e) => setForm({ ...form, provider_name: e.target.value })} placeholder="Name" />
+        </div>
+        <div>
+          <label style={{ display: 'block', marginBottom: '4px', fontWeight: '500', fontSize: '14px' }}>Login Username</label>
+          <input value={form.login_username} onChange={(e) => setForm({ ...form, login_username: e.target.value })} placeholder="Login" />
+        </div>
+        <div>
+          <label style={{ display: 'block', marginBottom: '4px', fontWeight: '500', fontSize: '14px' }}>Login Password</label>
+          <input type="password" value={form.login_password} onChange={(e) => setForm({ ...form, login_password: e.target.value })} placeholder="Password" />
+        </div>
         <button type="submit">Create</button>
         <button type="button" className="secondary" onClick={loadProviders}>Refresh</button>
       </form>

@@ -12,6 +12,10 @@ class Settings(BaseSettings):
     keycloak_realm: str = 'oan'
     keycloak_client_id: str = 'oan-portal'
     keycloak_client_secret: str = 'oan-portal-secret'
+    keycloak_admin_realm: str = 'master'
+    keycloak_admin_client_id: str = 'admin-cli'
+    keycloak_admin_username: str = 'admin'
+    keycloak_admin_password: str = 'admin'
 
     auth_enabled: bool = True
 

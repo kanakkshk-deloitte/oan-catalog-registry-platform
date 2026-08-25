@@ -42,7 +42,7 @@ A comprehensive catalog management system for the Open Agriculture Network (OAN)
     │         │        │         │
 ┌───▼───┐ ┌──▼──┐ ┌───▼────┐ ┌──▼──┐
 │PostgreSQL Redis│ Keycloak│ │Other│
-│ (5434)│(6380)│ │ (8081) │ │Services│
+│ (5434)│(6380)│ │ (8082) │ │Services│
 └───────┘ └─────┘ └────────┘ └─────┘
 ```
 
@@ -50,7 +50,7 @@ A comprehensive catalog management system for the Open Agriculture Network (OAN)
 
 - **Docker** and **Docker Compose** (v2.0+)
 - **Git**
-- **Ports Available**: 5173, 8000, 8081, 5434, 6380
+- **Ports Available**: 5173, 8000, 8081, 8082, 5434, 6380
 
 ### System Requirements
 - OS: Linux/macOS/Windows with WSL2
@@ -108,7 +108,7 @@ docker compose restart frontend
 | **Frontend** | http://localhost:5173 | See below |
 | **Backend API** | http://localhost:8000 | N/A |
 | **API Docs** | http://localhost:8000/docs | N/A |
-| **Keycloak Admin** | http://localhost:8081 | admin / admin |
+| **Keycloak Admin** | http://localhost:8082 | admin / admin |
 
 ### Default User Accounts
 
@@ -202,9 +202,12 @@ Content-Type: application/json
 {
   "provider_code": "ABC",
   "provider_name": "ABC Agriculture",
-  "login_username": "provider_abc"
+  "login_username": "provider_abc",
+  "login_password": "provider123"
 }
 ```
+
+`login_password` is optional; if omitted, backend uses default `provider123`.
 
 #### Provider Endpoints
 
@@ -239,13 +242,13 @@ Content-Type: application/json
 
 {
   "context": {
-    "domain": "nic2004:52395",
+    "domain": "weather-advisory:oan",
     "country": "IND",
-    "city": "std:080",
+    "city": "Bengaluru",
     "action": "search",
-    "core_version": "1.1.0",
-    "bap_id": "onix-bap.local",
-    "bap_uri": "https://onix-bap.local",
+    "version": "1.1.0",
+    "bap_id": "bap-network",
+    "bap_uri": "http://onix-adapter:8081/bap/receiver",
     "transaction_id": "txn-123",
     "message_id": "msg-123",
     "timestamp": "2026-08-25T10:00:00Z"
@@ -261,6 +264,32 @@ Content-Type: application/json
   }
 }
 ```
+
+### Beckn Search Behavior
+
+- The `/search` endpoint is permissive and always returns immediate ACK.
+- Payload validation errors are logged for debugging and do not block ACK.
+- Search processing runs asynchronously and posts `on_search` callback later.
+
+### ONIX Callback Routing
+
+The backend callback URL is built using the same pattern as OAN Provider Service:
+
+- For domains `schemes:oan` or `schemes:vistaar`:
+  - Use `x-forwarded-host` when present: `http://<forwarded-host>/bpp/caller/on_search`
+  - Fallback: `http://onix-adapter2:8081/bpp/caller/on_search`
+- For other domains:
+  - If `bap_uri` contains `/bap/receiver`, map to `/bpp/caller/on_search`
+  - Else append `/on_search` to `bap_uri`
+
+### BPP Proxy Path (ONIX)
+
+For ONIX BPP receiver routing, this project includes an internal proxy service:
+
+- Service name: `oan-bpp-proxy`
+- Internal URL used by ONIX routing: `http://oan-bpp-proxy:8080/search`
+
+This helps normalize transport behavior between ONIX and the backend.
 
 ## 🏷️ Category Hierarchy
 
@@ -312,6 +341,13 @@ See [CATEGORY_HIERARCHY.md](./CATEGORY_HIERARCHY.md) for detailed documentation.
 ```
 Authorization: Bearer eyJhbGciOiJSUzI1NiIs...
 ```
+
+### Provider Password Change
+
+- Provider users can change their password from the Provider Portal using the `Change Password` button.
+- The portal prompts for current and new password and calls backend API `POST /auth/change-password`.
+- Backend first verifies current password, then updates password using Keycloak Admin API.
+- If current password is wrong or password policy fails, the API returns an error message.
 
 ### Roles
 

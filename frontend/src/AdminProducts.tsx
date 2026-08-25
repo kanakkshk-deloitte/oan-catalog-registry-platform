@@ -89,57 +89,78 @@ export function AdminProducts({ token, message, error, setMessage, setError }: A
     <>
       <h3>Products</h3>
       <form className="row" onSubmit={createProduct}>
-        <input
-          value={form.product_id}
-          onChange={(e) => setForm({ ...form, product_id: e.target.value })}
-          placeholder="Product ID"
-        />
-        <input
-          value={form.name}
-          onChange={(e) => setForm({ ...form, name: e.target.value })}
-          placeholder="Name"
-        />
-        <select
-          value={form.supercategory}
-          onChange={(e) => setForm({ ...form, supercategory: e.target.value, category: '', subcategory: '' })}
-          required
-        >
-          <option value="">Select Supercategory</option>
-          {supercategories.map((sc) => (
-            <option key={sc} value={sc}>{sc}</option>
-          ))}
-        </select>
-        <select
-          value={form.category}
-          onChange={(e) => setForm({ ...form, category: e.target.value, subcategory: '' })}
-          required
-          disabled={!form.supercategory}
-        >
-          <option value="">Select Category</option>
-          {categoriesForSuper.map((cat) => (
-            <option key={cat} value={cat}>{cat}</option>
-          ))}
-        </select>
-        <select
-          value={form.subcategory}
-          onChange={(e) => setForm({ ...form, subcategory: e.target.value })}
-          disabled={!form.category}
-        >
-          <option value="">Select Subcategory (optional)</option>
-          {subcategoriesForCategory.map((sub) => (
-            <option key={sub} value={sub}>{sub}</option>
-          ))}
-        </select>
-        <input
-          value={form.unit}
-          onChange={(e) => setForm({ ...form, unit: e.target.value })}
-          placeholder="Unit"
-        />
-        <input
-          value={form.npk_ratio}
-          onChange={(e) => setForm({ ...form, npk_ratio: e.target.value })}
-          placeholder="NPK ratio"
-        />
+        <div>
+          <label style={{ display: 'block', marginBottom: '4px', fontWeight: '500', fontSize: '14px' }}>Product ID</label>
+          <input
+            value={form.product_id}
+            onChange={(e) => setForm({ ...form, product_id: e.target.value })}
+            placeholder="Product ID"
+          />
+        </div>
+        <div>
+          <label style={{ display: 'block', marginBottom: '4px', fontWeight: '500', fontSize: '14px' }}>Product Name</label>
+          <input
+            value={form.name}
+            onChange={(e) => setForm({ ...form, name: e.target.value })}
+            placeholder="Name"
+          />
+        </div>
+        <div>
+          <label style={{ display: 'block', marginBottom: '4px', fontWeight: '500', fontSize: '14px' }}>Supercategory *</label>
+          <select
+            value={form.supercategory}
+            onChange={(e) => setForm({ ...form, supercategory: e.target.value, category: '', subcategory: '' })}
+            required
+          >
+            <option value="">Select Supercategory</option>
+            {supercategories.map((sc) => (
+              <option key={sc} value={sc}>{sc}</option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label style={{ display: 'block', marginBottom: '4px', fontWeight: '500', fontSize: '14px' }}>Category *</label>
+          <select
+            value={form.category}
+            onChange={(e) => setForm({ ...form, category: e.target.value, subcategory: '' })}
+            required
+            disabled={!form.supercategory}
+          >
+            <option value="">Select Category</option>
+            {categoriesForSuper.map((cat) => (
+              <option key={cat} value={cat}>{cat}</option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label style={{ display: 'block', marginBottom: '4px', fontWeight: '500', fontSize: '14px' }}>Subcategory</label>
+          <select
+            value={form.subcategory}
+            onChange={(e) => setForm({ ...form, subcategory: e.target.value })}
+            disabled={!form.category}
+          >
+            <option value="">Select Subcategory (optional)</option>
+            {subcategoriesForCategory.map((sub) => (
+              <option key={sub} value={sub}>{sub}</option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label style={{ display: 'block', marginBottom: '4px', fontWeight: '500', fontSize: '14px' }}>Unit</label>
+          <input
+            value={form.unit}
+            onChange={(e) => setForm({ ...form, unit: e.target.value })}
+            placeholder="Unit"
+          />
+        </div>
+        <div>
+          <label style={{ display: 'block', marginBottom: '4px', fontWeight: '500', fontSize: '14px' }}>NPK Ratio</label>
+          <input
+            value={form.npk_ratio}
+            onChange={(e) => setForm({ ...form, npk_ratio: e.target.value })}
+            placeholder="NPK ratio"
+          />
+        </div>
         <button type="submit">Create Product</button>
         <button type="button" className="secondary" onClick={loadProducts}>
           Refresh

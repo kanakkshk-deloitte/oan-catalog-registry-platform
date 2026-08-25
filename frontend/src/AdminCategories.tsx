@@ -84,28 +84,40 @@ export function AdminCategories({ token, message, error, setMessage, setError }:
             </p>
 
             <form className="row" onSubmit={createCategory}>
-                <input
-                    value={form.supercategory}
-                    onChange={(e) => setForm({ ...form, supercategory: e.target.value })}
-                    placeholder="Supercategory (e.g., Agricultural Inputs)"
-                    required
-                />
-                <input
-                    value={form.category}
-                    onChange={(e) => setForm({ ...form, category: e.target.value })}
-                    placeholder="Category (e.g., Fertilizers)"
-                    required
-                />
-                <input
-                    value={form.subcategory}
-                    onChange={(e) => setForm({ ...form, subcategory: e.target.value })}
-                    placeholder="Subcategory (optional, e.g., NPK Fertilizers)"
-                />
-                <input
-                    value={form.description}
-                    onChange={(e) => setForm({ ...form, description: e.target.value })}
-                    placeholder="Description (optional)"
-                />
+                <div>
+                    <label style={{ display: 'block', marginBottom: '4px', fontWeight: '500', fontSize: '14px' }}>Supercategory *</label>
+                    <input
+                        value={form.supercategory}
+                        onChange={(e) => setForm({ ...form, supercategory: e.target.value })}
+                        placeholder="e.g., Agricultural Inputs"
+                        required
+                    />
+                </div>
+                <div>
+                    <label style={{ display: 'block', marginBottom: '4px', fontWeight: '500', fontSize: '14px' }}>Category *</label>
+                    <input
+                        value={form.category}
+                        onChange={(e) => setForm({ ...form, category: e.target.value })}
+                        placeholder="e.g., Fertilizers"
+                        required
+                    />
+                </div>
+                <div>
+                    <label style={{ display: 'block', marginBottom: '4px', fontWeight: '500', fontSize: '14px' }}>Subcategory</label>
+                    <input
+                        value={form.subcategory}
+                        onChange={(e) => setForm({ ...form, subcategory: e.target.value })}
+                        placeholder="e.g., NPK Fertilizers (optional)"
+                    />
+                </div>
+                <div>
+                    <label style={{ display: 'block', marginBottom: '4px', fontWeight: '500', fontSize: '14px' }}>Description</label>
+                    <input
+                        value={form.description}
+                        onChange={(e) => setForm({ ...form, description: e.target.value })}
+                        placeholder="Description (optional)"
+                    />
+                </div>
                 <button type="submit">Add Category</button>
                 <button type="button" className="secondary" onClick={loadCategories}>
                     Refresh

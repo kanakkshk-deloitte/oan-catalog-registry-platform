@@ -1,0 +1,220 @@
+================================================================================
+BAP SEARCH REQUEST PAYLOAD FOR OAN CATALOG REGISTRY
+================================================================================
+
+ENDPOINT: POST http://172.31.40.216:8000/search
+(Or through ONIX adapter routing)
+
+================================================================================
+1. SEARCH ALL PRODUCTS (Empty Intent)
+================================================================================
+
+{
+  "context": {
+    "domain": "agriculture:oan",
+    "country": "IND",
+    "city": "Bengaluru",
+    "action": "search",
+    "core_version": "1.1.0",
+    "bap_id": "bap-network.beckn.org",
+    "bap_uri": "https://bap-network.beckn.org",
+    "transaction_id": "a9aaecca-10b7-4d19-b640-b047a7c62196",
+    "message_id": "123e4567-e89b-12d3-a456-426614174000",
+    "timestamp": "2026-08-25T10:30:00.000Z"
+  },
+  "message": {
+    "intent": {}
+  }
+}
+
+================================================================================
+2. SEARCH FOR FERTILIZER
+================================================================================
+
+{
+  "context": {
+    "domain": "agriculture:oan",
+    "country": "IND",
+    "city": "Bengaluru",
+    "action": "search",
+    "core_version": "1.1.0",
+    "bap_id": "bap-network.beckn.org",
+    "bap_uri": "https://bap-network.beckn.org",
+    "transaction_id": "txn-fertilizer-001",
+    "message_id": "msg-fertilizer-001",
+    "timestamp": "2026-08-25T10:30:00.000Z"
+  },
+  "message": {
+    "intent": {
+      "item": {
+        "descriptor": {
+          "name": "fertilizer"
+        }
+      }
+    }
+  }
+}
+
+================================================================================
+3. SEARCH FOR NPK FERTILIZER
+================================================================================
+
+{
+  "context": {
+    "domain": "agriculture:oan",
+    "country": "IND",
+    "city": "Pune",
+    "action": "search",
+    "core_version": "1.1.0",
+    "bap_id": "agri-bap.beckn.org",
+    "bap_uri": "https://agri-bap.beckn.org",
+    "transaction_id": "txn-npk-search-001",
+    "message_id": "msg-npk-search-001",
+    "timestamp": "2026-08-25T11:15:00.000Z"
+  },
+  "message": {
+    "intent": {
+      "item": {
+        "descriptor": {
+          "name": "NPK"
+        }
+      }
+    }
+  }
+}
+
+================================================================================
+4. SEARCH BY PROVIDER
+================================================================================
+
+{
+  "context": {
+    "domain": "agriculture:oan",
+    "country": "IND",
+    "city": "Mumbai",
+    "action": "search",
+    "core_version": "1.1.0",
+    "bap_id": "marketplace.beckn.org",
+    "bap_uri": "https://marketplace.beckn.org",
+    "transaction_id": "txn-provider-abc",
+    "message_id": "msg-provider-abc",
+    "timestamp": "2026-08-25T12:00:00.000Z"
+  },
+  "message": {
+    "intent": {
+      "item": {
+        "descriptor": {
+          "name": "ABC"
+        }
+      }
+    }
+  }
+}
+
+================================================================================
+CURL COMMANDS
+================================================================================
+
+# Direct to backend
+curl -X POST http://172.31.40.216:8000/search \
+  -H "Content-Type: application/json" \
+  -d '{
+    "context": {
+      "domain": "agriculture:oan",
+      "country": "IND",
+      "city": "Bengaluru",
+      "action": "search",
+      "core_version": "1.1.0",
+      "bap_id": "test-bap.local",
+      "bap_uri": "https://test-bap.local",
+      "transaction_id": "txn-test-123",
+      "message_id": "msg-test-123",
+      "timestamp": "2026-08-25T10:30:00Z"
+    },
+    "message": {
+      "intent": {
+        "item": {
+          "descriptor": {
+            "name": "fertilizer"
+          }
+        }
+      }
+    }
+  }'
+
+# Through ONIX adapter (if configured)
+curl -X POST http://localhost:8080/bap/receiver/search \
+  -H "Content-Type: application/json" \
+  -d '{
+    "context": {
+      "domain": "agriculture:oan",
+      "country": "IND",
+      "city": "Bengaluru",
+      "action": "search",
+      "core_version": "1.1.0",
+      "bap_id": "test-bap.local",
+      "bap_uri": "http://localhost:8080/bap/receiver",
+      "transaction_id": "txn-onix-001",
+      "message_id": "msg-onix-001",
+      "timestamp": "2026-08-25T10:30:00Z"
+    },
+    "message": {
+      "intent": {
+        "item": {
+          "descriptor": {
+            "name": "fertilizer"
+          }
+        }
+      }
+    }
+  }'
+
+================================================================================
+EXPECTED RESPONSE (ASYNC)
+================================================================================
+
+BAP will receive IMMEDIATE ACK:
+{
+  "message": {
+    "ack": {
+      "status": "ACK"
+    }
+  }
+}
+
+Then BPP will POST callback to: bap_uri/on_search with catalog data
+
+================================================================================
+CONTEXT FIELDS EXPLANATION
+================================================================================
+
+Required Fields:
+- domain: "agriculture:oan" (for OAN catalog registry)
+- country: ISO country code (e.g., "IND")
+- city: City name
+- action: "search"
+- core_version: Beckn version (e.g., "1.1.0")
+- bap_id: Unique BAP identifier
+- bap_uri: BAP callback URL (BPP will POST to bap_uri/on_search)
+- transaction_id: Unique transaction UUID (persist across search/select/init/confirm)
+- message_id: Unique message UUID (new for each request)
+- timestamp: ISO 8601 timestamp
+
+Optional Intent Fields:
+- item.descriptor.name: Search query (product name, category, provider)
+- If empty or not provided, returns all active products
+
+================================================================================
+IMPORTANT NOTES
+================================================================================
+
+1. Domain: Use "agriculture:oan" for OAN Catalog Registry
+2. bap_uri: Must be accessible from BPP for callback
+3. transaction_id: Should be same for entire transaction flow
+4. message_id: Generate new UUID for each message
+5. Async Response: BAP receives ACK immediately, then callback with results
+6. Search Query: Case-insensitive, matches product name, category, provider
+
+================================================================================
+END OF FILE
+================================================================================
