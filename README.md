@@ -265,6 +265,141 @@ Content-Type: application/json
 }
 ```
 
+**Search Request (from BAP to BPP):**
+```json
+{
+  "context": {
+    "domain": "agriculture",
+    "country": "IND",
+    "city": "Bengaluru",
+    "action": "search",
+    "core_version": "1.1.0",
+    "bap_id": "example-bap.com",
+    "bap_uri": "https://example-bap.com",
+    "transaction_id": "a9aaecca-10b7-4d19-b640-b047a7c62196",
+    "message_id": "123e4567-e89b-12d3-a456-426614174000",
+    "timestamp": "2026-08-25T10:30:00.000Z"
+  },
+  "message": {
+    "intent": {
+      "item": {
+        "descriptor": {
+          "name": "fertilizer"
+        }
+      }
+    }
+  }
+}
+```
+
+**ON_SEARCH Response (from BPP to BAP):**
+```json
+{
+  "context": {
+    "domain": "agriculture",
+    "country": "IND",
+    "city": "Bengaluru",
+    "action": "on_search",
+    "core_version": "1.1.0",
+    "bap_id": "example-bap.com",
+    "bap_uri": "https://example-bap.com",
+    "bpp_id": "oan-catalog-registry.local",
+    "bpp_uri": "https://oan-catalog-registry.local",
+    "transaction_id": "a9aaecca-10b7-4d19-b640-b047a7c62196",
+    "message_id": "987f6543-e21c-34d5-b654-789012345678",
+    "timestamp": "2026-08-25T10:30:01.234Z"
+  },
+  "message": {
+    "catalog": {
+      "descriptor": {
+        "name": "OAN Catalog Registry"
+      },
+      "providers": [
+        {
+          "id": "ABC-AGRI-001",
+          "descriptor": {
+            "name": "ABC Agriculture"
+          },
+          "items": [
+            {
+              "id": "LIST-ABC-001",
+              "descriptor": {
+                "name": "NPK Fertilizer 10-26-26"
+              },
+              "category_id": "Fertilizers",
+              "price": {
+                "currency": "INR",
+                "value": "850.00"
+              },
+              "quantity": {
+                "available": {
+                  "count": "500"
+                }
+              },
+              "tags": {
+                "product_id": "OAN-PROD-1001",
+                "sku": "ABC-NPK-001",
+                "availability": "ACTIVE"
+              }
+            },
+            {
+              "id": "LIST-ABC-002",
+              "descriptor": {
+                "name": "Organic Fertilizer"
+              },
+              "category_id": "Fertilizers",
+              "price": {
+                "currency": "INR",
+                "value": "750.00"
+              },
+              "quantity": {
+                "available": {
+                  "count": "300"
+                }
+              },
+              "tags": {
+                "product_id": "OAN-PROD-1002",
+                "sku": "ABC-ORG-001",
+                "availability": "ACTIVE"
+              }
+            }
+          ]
+        },
+        {
+          "id": "XYZ-AGRO-002",
+          "descriptor": {
+            "name": "XYZ Agro Products"
+          },
+          "items": [
+            {
+              "id": "LIST-XYZ-001",
+              "descriptor": {
+                "name": "NPK Fertilizer 10-26-26"
+              },
+              "category_id": "Fertilizers",
+              "price": {
+                "currency": "INR",
+                "value": "900.00"
+              },
+              "quantity": {
+                "available": {
+                  "count": "250"
+                }
+              },
+              "tags": {
+                "product_id": "OAN-PROD-1001",
+                "sku": "XYZ-NPK-001",
+                "availability": "ACTIVE"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
+```
+
 ### Beckn Search Behavior
 
 - The `/search` endpoint is permissive and always returns immediate ACK.
