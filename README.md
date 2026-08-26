@@ -242,7 +242,7 @@ Content-Type: application/json
 
 {
   "context": {
-    "domain": "weather-advisory:oan",
+    "domain": "agri-marketplace:oan",
     "country": "IND",
     "city": "Bengaluru",
     "action": "search",
@@ -269,7 +269,7 @@ Content-Type: application/json
 ```json
 {
   "context": {
-    "domain": "agriculture",
+    "domain": "agri-marketplace:oan",
     "country": "IND",
     "city": "Bengaluru",
     "action": "search",
@@ -296,7 +296,7 @@ Content-Type: application/json
 ```json
 {
   "context": {
-    "domain": "agriculture",
+    "domain": "agri-marketplace:oan",
     "country": "IND",
     "city": "Bengaluru",
     "action": "on_search",
